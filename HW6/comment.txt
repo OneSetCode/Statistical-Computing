@@ -1,0 +1,71 @@
+//My changes to the AddRegression function is written below. After adding the regressions, if the length of the list is larger than nMaxReg, the program will delete the last 'length - nMaxReg' regressions so that only nMaxReg regressions left.
+
+void AddRegression(int nMaxRegs, LPRegression regressions, int lenA, int* A, double logmarglikA)
+{
+  int i;
+  LPRegression p = regressions;
+  LPRegression pnext = p->Next;
+
+  while(NULL!=pnext)
+  {
+     //return if we have previously found this regression
+     if(sameregression(lenA,A,pnext->lenA,pnext->A))
+     {
+        return;
+     }
+
+     //go to the next element in the list if the current
+     //regression has a larger log marginal likelihood than
+     //the new regression A
+     if(pnext->logmarglikA>logmarglikA)
+     {
+        p = pnext;
+        pnext = p->Next;
+     }
+     else //otherwise stop; this is where we insert the new regression
+     {
+        break;
+     }
+  }
+
+  //create a new element of the list
+  LPRegression newp = new Regression;
+  newp->lenA = lenA;
+  newp->logmarglikA = logmarglikA;
+  newp->A = new int[lenA];
+  
+  //copy the predictors
+  for(i=0;i<lenA;i++)
+  {
+    newp->A[i] = A[i];
+  }
+
+  //insert the new element in the list
+  p->Next = newp;
+  newp->Next = pnext;
+
+  for(i = 0; i < lenA; i++)
+  {
+    printf("inserted [%d]\n", A[i]);
+  }
+
+  p = regressions;
+  pnext = p->Next;
+
+  int len = 0;
+  while(pnext != NULL) 
+  {
+    len += 1;
+    p = pnext;
+    pnext = p->Next;
+  }
+
+  if(len > nMaxRegs) 
+  {
+    for(int j = 0; j < len - nMaxRegs; j++) 
+    {
+      DeleteLastRegression(regressions);
+    }
+  }
+  return;
+}
